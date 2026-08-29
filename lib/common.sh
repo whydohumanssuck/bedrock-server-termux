@@ -202,10 +202,10 @@ download_server_archive() {
   local dest="$1"
   local ua="Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Mobile Safari/537.36"
   local candidates=()
-  candidates+=("https://minecraft.azureedge.net/bin-linux/${BDS_FILENAME}")
+  # Current official CDN host + path. The old minecraft.azureedge.net host is
+  # retired, so it is not tried (avoids a long dead-DNS timeout on phones).
   candidates+=("https://www.minecraft.net/bedrockdedicatedserver/bin-linux/${BDS_FILENAME}")
-  candidates+=("https://asset.msn.cn/01150/bin-linux/${BDS_FILENAME}")
-  candidates+=("https://www.minecraft.net/bedrockdedicatedserver/bin-linux/${BDS_FILENAME}")
+  candidates+=("https://minecraft.net/bedrockdedicatedserver/bin-linux/${BDS_FILENAME}")
 
   local url=""
   for url in "${candidates[@]}"; do
@@ -218,20 +218,27 @@ download_server_archive() {
     rm -f "${dest}.part"
   done
 
-  # Last resort: scrape the official page for whatever version it offers and
-  # let the caller's version check reject mismatches.
-  info "Direct links failed; parsing the official download page..."
-  local page
-  page="$(curl -fsSL --connect-timeout 20 --max-time 60 -A "${ua}" "$(mc_download_page)" 2>/dev/null || true)"
-  local link
-  link="$(printf '%s' "${page}" | grep -oE 'https?://[^"'"'"' ]*bedrock-server-[0-9.]+\.zip' | head -1)"
+  # Last resort: the download page itself is JS-driven, so resolve the
+  # newest *stable* build of the pinned game version from the community wiki
+  # (which mirrors the official archive listing), then let the caller's
+  # version check reject anything wrong.
+  info "Direct links failed; resolving the latest stable build for $(bds_target_game) ..."
+  local page link
+  page="$(curl -fsSL --connect-timeout 20 --max-time 60 -A "${ua}" \
+            'https://minecraft.wiki/w/Bedrock_Dedicated_Server' 2>/dev/null || true)"
+  link="$(printf '%s' "${page}" \
+          | grep -oE "https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-$(bds_target_game)\.[0-9]+\.zip" \
+          | sort -u | tail -1)"
   if [ -n "${link}" ]; then
-    info "Official page offered: ${link}"
+    info "Resolved: ${link}"
     if curl -fL --retry 2 --connect-timeout 20 --max-time 900 -A "${ua}" \
          -o "${dest}.part" "${link}" 2>/dev/null && plausible_zip "${dest}.part"; then
       mv "${dest}.part" "${dest}" && ok "Downloaded ${dest}" && return 0
     fi
     rm -f "${dest}.part"
+  else
+    warn "Could not resolve an official download link. You can manually download
+${BDS_FILENAME} from the official page into data/ and run with --no-download."
   fi
   return 1
 }

@@ -9,10 +9,10 @@ BDS_GAME_VERSION="1.21.130"
 
 # Full BDS build identifier used in the official download filename:
 #   bedrock-server-<GAME_VERSION>.<BUILD>.zip
-# For 1.21.130 the first public BDS build is .01. If the official page ever
-# serves a different build number for the same game version, override it:
-#   BDS_BUILD="1.21.130.02" ./install.sh
-BDS_BUILD="${BDS_BUILD:-1.21.130.01}"
+# For 1.21.130 the published stable BDS builds are .3 and .4; the project
+# pins the newest (.4). Override with:
+#   BDS_BUILD="1.21.130.3" ./install.sh
+BDS_BUILD="${BDS_BUILD:-1.21.130.4}"
 BDS_FILENAME="bedrock-server-${BDS_BUILD}.zip"
 
 # Official download page (used as the last download fallback).
