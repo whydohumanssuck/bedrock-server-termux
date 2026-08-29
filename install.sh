@@ -31,6 +31,10 @@ Options:
                   of inside a proot-distro Debian container
   -h, --help      Show this help"
 
+# Keep the original CLI args; the parsing loop below consumes them via
+# shift, but the proot bounce further down still needs them.
+ORIG_ARGS="$*"
+
 NO_DOWNLOAD=0
 FORCE=0
 SKIP_PROOT=0
@@ -168,7 +172,7 @@ installed, run: proot-distro reset debian, then ./install.sh again."
   info "Re-running the installer inside the Debian container..."
   # shellcheck disable=SC2086  # options carry no spaces; splitting is safe
   exec proot-distro login "${DISTRO}" -- bash -lc \
-    'cd /root/mc-bedrock-server && BDS_INSIDE_DISTRO=1 ./install.sh '"$*" 
+    'cd /root/mc-bedrock-server && BDS_INSIDE_DISTRO=1 ./install.sh '"${ORIG_ARGS}" 
 fi
 
 # From here on we are either in the Debian container, direct on Termux
