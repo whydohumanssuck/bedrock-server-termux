@@ -139,9 +139,15 @@ if should_use_distro && [ "${SKIP_PROOT}" -eq 0 ]; then
     pkg install -y proot-distro curl unzip jq tmux || \
       die "Could not install proot-distro. Run: pkg install proot-distro curl unzip jq tmux"
   fi
-  if ! proot-distro list --installed 2>/dev/null | grep -q "${DISTRO}"; then
+  if ! distro_exists; then
     info "Installing the Debian container (downloads ~1GB of packages; please wait)..."
-    proot-distro install "${DISTRO}" || die "proot-distro install failed."
+    # proot-distro refuses to install a container whose rootfs already exists
+    # (e.g. after an interrupted earlier run). That is not an error: verify
+    # afterwards that it either exists or the install really succeeded.
+    if ! proot-distro install "${DISTRO}" >/dev/null 2>&1 && ! distro_exists; then
+      die "proot-distro install failed. If the Debian container was partially
+installed, run: proot-distro reset debian, then ./install.sh again."
+    fi
   fi
 
   # Stage the whole project so the container gets every script, config,

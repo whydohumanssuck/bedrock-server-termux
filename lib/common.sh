@@ -91,6 +91,16 @@ bds_can_run() {
   return 1
 }
 
+# distro_exists: 0 if the proot-distro Debian container is installed.
+# Checks both proot-distro's status list AND the rootfs directory, because
+# the list query can be stale after an interrupted install.
+distro_exists() {
+  if proot-distro list --installed 2>/dev/null | grep -q "^${DISTRO}$"; then return 0; fi
+  local roots="${PREFIX:-/data/data/com.termux/files/usr}/var/lib/proot-distro/installed-rootfs"
+  [ -d "${roots}/${DISTRO}" ] && return 0
+  return 1
+}
+
 # in_distro: 0 if this shell is already running inside the proot container
 # (the rest of the project is executed there on ARM64 devices).
 in_distro() {
@@ -281,7 +291,7 @@ bounce_into_distro() {
     if ! command -v proot-distro >/dev/null 2>&1; then
       die "proot-distro is missing. Run: pkg install proot-distro"
     fi
-    if ! proot-distro list --installed 2>/dev/null | grep -q "${DISTRO}"; then
+    if ! distro_exists; then
       die "The ${DISTRO} container is not installed. Run ./install.sh first."
     fi
     info "Bouncing into the ${DISTRO} container..."

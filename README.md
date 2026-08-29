@@ -314,6 +314,13 @@ project/
 
 ## Troubleshooting
 
+**`install.sh` says "container 'debian' already exists" (or stops at the
+Debian container step after a partial run).**
+- The installer now detects an existing container and continues. Just run
+  `./install.sh` again.
+- Still stuck? Fix the container state and retry:
+  `proot-distro reset debian && ./install.sh`
+
 **`install.sh` fails to download the server.**
 - The official CDN (`minecraft.azureedge.net`) is sometimes unreachable on
   phones with strict DNS. The installer tries several official mirrors and the
