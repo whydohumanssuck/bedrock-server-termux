@@ -1,0 +1,66 @@
+# ============================================================================
+#  Minecraft Bedrock Dedicated Server - server.properties
+#  Tuned for an Android phone serving 3-5 players.
+#  Edit values here, then run ./start.sh to apply (a restart is required).
+# ============================================================================
+
+# The name shown in the multiplayer server list.
+server-name=My Bedrock Server
+
+# Default game mode for new players: survival, creative, adventure, spectator.
+gamemode=survival
+
+# difficulty: peaceful, easy, normal, hard
+difficulty=normal
+
+# allow-cheats: enable for commands like /give and /tp. true/false
+allow-cheats=false
+
+# max-players: how many players can join at once. Keep low for a phone.
+max-players=5
+
+# online-mode: true = Xbox/Microsoft authentication (recommended for internet
+# play). Set false only for a trusted LAN-only server.
+online-mode=true
+
+# white-list: true = only players listed in allowlist.json may join.
+white-list=false
+
+# server-port / server-portv6: UDP ports. LAN discovery uses 19132.
+server-port=19132
+server-portv6=19133
+
+# view-distance: render distance in chunks. Lower = less CPU/battery.
+view-distance=6
+
+# tick-distance: how far from players chunks remain simulated. Lower = less CPU.
+tick-distance=4
+
+# player-idle-timeout: minutes of inactivity before a player is kicked.
+player-idle-timeout=30
+
+# max-threads: 0 = let the server decide; limit it if your phone runs hot.
+max-threads=0
+
+# level-name: the folder name inside <server>/worlds that will be loaded.
+# When you import a world this is set automatically.
+level-name=Bedrock level
+
+# level-seed: world seed; only used when creating a brand-new world.
+level-seed=
+
+# default-player-permission-level: visitor, member, operator
+default-player-permission-level=member
+
+# texturepack-required: require clients to have the server's resource pack.
+texturepack-required=false
+
+# Advanced / performance options below are phone friendly defaults.
+content-log-file-enabled=true
+compression-threshold=1
+server-authoritative-movement=server-auth
+player-movement-score-threshold=20
+player-movement-distance-threshold=0.3
+player-movement-duration-threshold-in-ms=500
+correct-player-movement=false
+emit-server-telemetry=false

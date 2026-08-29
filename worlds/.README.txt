@@ -1,0 +1,25 @@
+IMPORTING / CREATING A WORLD
+============================
+
+QUICK OPTION -- LET THE SERVER CREATE ONE
+  Just start the server (./start.sh). It will create a fresh world named
+  "Bedrock level" (change "level-name" in server.properties) the first time
+  it runs.
+
+IMPORT AN EXISTING BEDROCK WORLD
+  1. Find your world folder. On a phone in Pocket Edition it looks like a
+     random string, e.g.  "aBcDeFgHiJkLmNoPq123". Inside are files like
+     level.dat, levelname.txt and a db/ folder.
+  2. Copy that whole folder into this project's  worlds/  directory.
+  3. Run  ./install.sh  (it copies everything from worlds/ into the server's
+     worlds/ folder) -- or, if already installed, run  ./start.sh  which
+     imports new worlds automatically.
+  4. The server automatically points level-name at the imported world when
+     worlds/ has exactly one world.
+
+CREATING A WORLD WITH A SPECIFIC SEED
+  - Edit server.properties: pick a folder name for the world and set
+      level-name=MyNewWorld
+      level-seed=12345
+  - Delete that folder from <server>/worlds if you want to force a re-create,
+    then start the server.

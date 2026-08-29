@@ -1,0 +1,9 @@
+BEHAVIOR PACKS
+==============
+
+Place behavior pack folders here (each pack is a folder containing a
+manifest.json). The installer copies everything from this folder into the
+server's behavior_packs/ directory on every start.
+
+Enable / configure them by editing  <server>/behavior_packs/  directly if you
+need more control over pack order or the world_packs.json settings.

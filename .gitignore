@@ -1,0 +1,24 @@
+# ---- Bedrock server runtime (downloaded + generated, never committed) ----
+/bedrock_server/
+
+# ---- Downloads / logs / backups -----------------------------------------
+/data/*
+!/data/.gitkeep
+/logs/*
+!/logs/.gitkeep
+/backups/*
+!/backups/.gitkeep
+
+# ---- World / pack content is large and user-specific ---------------------
+/worlds/*
+!/worlds/.README.txt
+/behavior_packs/*
+!/behavior_packs/.README.txt
+/resource_packs/*
+!/resource_packs/.README.txt
+/config/server.properties
+
+# ---- Editor / OS cruft ----------------------------------------------------
+.DS_Store
+*.swp
+*~

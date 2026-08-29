@@ -1,0 +1,9 @@
+RESOURCE PACKS
+==============
+
+Place resource pack folders here (each pack is a folder containing a
+manifest.json). The installer copies everything from this folder into the
+server's resource_packs/ directory on every start.
+
+Set  texturepack-required=false  if clients should be allowed to join without
+downloading the pack.
