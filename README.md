@@ -1,17 +1,30 @@
 <div align="center">
 
-<img src="assets/server-icon.jpg" width="120" alt="Server logo"/>
+# ⛏️ Termux Bedrock Server
+
+**Run an official Minecraft Bedrock Dedicated Server on your Android phone — 1.21.130**
 
 <img src="docs/server-settings-screenshot.jpg" width="700" alt="Server configuration screenshot on Android"/>
 
-# ⛏️ Termux Bedrock Server
+![Bedrock](https://img.shields.io/badge/Bedrock%20Server-1.21.130-62B47A?style=flat-square&logo=minecraft&logoColor=white)
+![Android](https://img.shields.io/badge/Android%20%2F%20Termux-3DDC84?style=flat-square&logo=android&logoColor=white)
+![Arch](https://img.shields.io/badge/Architecture-ARM64-E8354C?style=flat-square&logo=arm&logoColor=white)
+![Emulation](https://img.shields.io/badge/Compatibility-box64-00ADD8?style=flat-square&logo=box&logoColor=white)
+![Shell](https://img.shields.io/badge/Shell-Bash-4EAA25?style=flat-square&logo=gnubash&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square&logo=open-source-initiative&logoColor=white)
+![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=flat-square)
+![Beginner](https://img.shields.io/badge/Beginner-Friendly-1E90FF?style=flat-square)
+![AutoRestart](https://img.shields.io/badge/Crash%20Restart-Auto-brightgreen?style=flat-square)
+![Backups](https://img.shields.io/badge/Backups-Included-8A2BE2?style=flat-square)
+![Made](https://img.shields.io/badge/Made%20with-%E2%9D%A4-ff69b4?style=flat-square)
 
-**Run a Minecraft Bedrock Dedicated Server on your Android phone — 1.21.130**
+[![Stars](https://img.shields.io/github/stars/whydohumanssuck/bedrock-server-termux?style=social)](https://github.com/whydohumanssuck/bedrock-server-termux/stargazers)
+[![Forks](https://img.shields.io/github/forks/whydohumanssuck/bedrock-server-termux?style=social)](https://github.com/whydohumanssuck/bedrock-server-termux/forks)
+[![Issues](https://img.shields.io/github/issues/whydohumanssuck/bedrock-server-termux?style=flat-square)](https://github.com/whydohumanssuck/bedrock-server-termux/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/whydohumanssuck/bedrock-server-termux?style=flat-square)](https://github.com/whydohumanssuck/bedrock-server-termux/commits/main)
+[![Repo Size](https://img.shields.io/github/repo-size/whydohumanssuck/bedrock-server-termux?style=flat-square)](https://github.com/whydohumanssuck/bedrock-server-termux)
 
-[![Platform](https://img.shields.io/badge/Platform-Android%20%2F%20Termux-3DDC84?logo=android&logoColor=white)](https://f-droid.org/en/packages/com.termux/)
-[![Game Version](https://img.shields.io/badge/Minecraft-Bedrock%201.21.130-62B47A?logo=minecraft&logoColor=white)](https://www.minecraft.net/en-us/download/server/bedrock)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Shell](https://img.shields.io/badge/Shell-Bash-4EAA25?logo=gnubash&logoColor=white)](install.sh)
+[![Repo Card](https://github-readme-stats.vercel.app/api/pin?username=whydohumanssuck&repo=bedrock-server-termux&theme=vue&show_owner=true&hide_border=true)](https://github.com/whydohumanssuck/bedrock-server-termux)
 
 </div>
 
