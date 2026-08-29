@@ -47,6 +47,8 @@ if [ "${stopped}" -eq 0 ]; then
   pkill -f 'bedrock_server' 2>/dev/null && sleep 2 || true
 fi
 
-rm -f "${PIDFILE}" "${STOP_REQUESTED}"
+# Leave STOP_REQUESTED in place: the supervisor consumes (and removes) it,
+# so it knows this exit was intentional and will not auto-restart.
+rm -f "${PIDFILE}"
 ok "Server stopped."
 exit 0

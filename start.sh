@@ -53,9 +53,11 @@ launch_server() {
   info "Launching: cd ${SERVER_DIR} && ${launch} (stdin <- control.fifo)"
   (
     cd "${SERVER_DIR}" || exit 1
-    # Feed the FIFO (fd 9) to stdin, tee output to the rotating log.
+    # Feed the FIFO (fd 9) to stdin and append output to the rotating log.
+    # exec (no pipe) guarantees $! below IS the server process, so crash
+    # detection and SIGTERM/SIGKILL act on the real server, never an orphan.
     exec 0<&9
-    exec ${launch} 2>&1 | tee -a "${SERVER_LOGFILE}"
+    exec ${launch} >> "${SERVER_LOGFILE}" 2>&1
   ) &
   SERVER_PID=$!
   printf '%s\n' "${SERVER_PID}" > "${PIDFILE}"
