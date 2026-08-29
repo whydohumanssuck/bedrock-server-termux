@@ -166,8 +166,9 @@ installed, run: proot-distro reset debian, then ./install.sh again."
   rm -rf "${STAGE}"
 
   info "Re-running the installer inside the Debian container..."
+  # shellcheck disable=SC2086  # options carry no spaces; splitting is safe
   exec proot-distro login "${DISTRO}" -- bash -lc \
-    'cd /root/mc-bedrock-server && BDS_INSIDE_DISTRO=1 ./install.sh'
+    'cd /root/mc-bedrock-server && BDS_INSIDE_DISTRO=1 ./install.sh '"$*" 
 fi
 
 # From here on we are either in the Debian container, direct on Termux
