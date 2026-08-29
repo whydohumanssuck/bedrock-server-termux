@@ -3,7 +3,7 @@
 # worlds, server.properties, whitelist/permissions and packs.
 #
 # Usage:
-#   BDS_BUILD=1.21.130.02 ./update.sh     # update to a specific build
+#   BDS_BUILD=1.21.130.3 ./update.sh      # update to a specific build
 #   ./update.sh                            # use the pinned version from lib/version.sh
 
 set -u

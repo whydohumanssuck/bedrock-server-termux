@@ -29,12 +29,9 @@ RESOURCE_PACK_BASE="${PROJECT_ROOT}/resource_packs"
 SERVER_LOGFILE="${LOGS_DIR}/server.log"
 PIDFILE="${LOGS_DIR}/server.pid"
 
-# proot-distro v5 gives each login its own /tmp, so tmux' default socket is
-# invisible across sessions. Use an explicit socket inside the project dir
-# (persistent and shared by every login).
-TMUX_SOCKET="${LOGS_DIR}/tmux-bds.sock"
+# STOP_REQUESTED tells the supervisor in start.sh that a stop was intentional,
+# so it does not auto-restart after the server exits.
 STOP_REQUESTED="${LOGS_DIR}/.stop-requested"
-
 # proot container name (Termux/ARM64 compatibility layer)
 DISTRO="debian"
 
@@ -314,6 +311,32 @@ is_running() {
 # Path the installer uses for the project inside the container.
 DISTRO_PROJECT_PATH="/root/mc-bedrock-server"
 
+# sync_into_distro: push fresh copies of the version-controlled code (lib/,
+# config/ and every top-level *.sh) from the host Termux project into the
+# running container. User data (worlds/, backups/, logs/, data/,
+# bedrock_server/) is left untouched, so this is safe to run on every bounce.
+sync_into_distro() {
+  local stage
+  stage="$(mktemp -d "${TMPDIR:-${HOME}}/mc-sync.XXXXXX" 2>/dev/null || mktemp -d)" || return 1
+  # Only copy sources, never generated/user data.
+  cp -r "${PROJECT_ROOT}/lib" "${PROJECT_ROOT}/config" "${stage}/" 2>/dev/null || true
+  for f in install.sh start.sh stop.sh backup.sh update.sh console.sh status.sh; do
+    [ -f "${PROJECT_ROOT}/${f}" ] && cp "${PROJECT_ROOT}/${f}" "${stage}/" 2>/dev/null || true
+  done
+  proot-distro login "${DISTRO}" --bind "${stage}:/sync" -- bash -lc '
+    dst="/root/mc-bedrock-server"
+    cp -r /sync/lib/.  "$dst/lib/"        2>/dev/null || true
+    cp -r /sync/config/. "$dst/config/"   2>/dev/null || true
+    for f in /sync/*.sh; do
+      [ -f "$f" ] && cp "$f" "$dst/" 2>/dev/null || true
+    done
+    rm -f "$dst/tmux-console.sh" # legacy script no longer used
+    chmod +x "$dst"/*.sh 2>/dev/null || true
+  ' || { rm -rf "${stage}"; return 1; }
+  rm -rf "${stage}"
+  return 0
+}
+
 bounce_into_distro() {
   if should_use_distro; then
     if ! command -v proot-distro >/dev/null 2>&1; then
@@ -322,13 +345,14 @@ bounce_into_distro() {
     if ! distro_exists; then
       die "The ${DISTRO} container is not installed. Run ./install.sh first."
     fi
+    info "Syncing the latest scripts into the ${DISTRO} container..."
+    sync_into_distro || warn "Could not sync scripts; continuing with what is in the container."
     info "Bouncing into the ${DISTRO} container..."
     exec proot-distro login "${DISTRO}" -- bash -lc \
       'cd "'"${DISTRO_PROJECT_PATH}"'" && BDS_INSIDE_DISTRO=1 ./'"$(basename "$0")"' '"$*"
   fi
 }
-
-# run_foreground: run the server in the foreground (used when tmux is missing).
+# run_foreground: run the server with commands read from the control FIFO.
 run_foreground() {
   local launch
   launch="$(server_launch_cmd)"

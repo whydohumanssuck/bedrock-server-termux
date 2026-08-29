@@ -86,8 +86,8 @@ What the installer does, in order:
 2. **Installs a Debian container** (`proot-distro install debian`) — this takes a
    few minutes the first time.
 3. Copies the project into the container and reruns the installer **inside it**.
-4. Inside the container: installs `curl`, `unzip`, `jq`, `tmux` and **`box64`**.
-5. **Downloads the official Bedrock server** `bedrock-server-1.21.130.01.zip`.
+4. Inside the container: installs `curl`, `unzip`, `jq` and **`box64`**.
+5. **Downloads the official Bedrock server** `bedrock-server-1.21.130.4.zip`.
 6. **Verifies** the archive layout and that the binary contains version
    `1.21.130`. If the download is corrupt or the wrong version, it **aborts
    safely** with a clear message instead of installing something wrong.
@@ -123,7 +123,7 @@ them small, and **automatically restarts the server on crashes** with
 exponential backoff. `./stop.sh` sends the server's `stop` command through the
 pipe, waits up to 45s for a clean shutdown, then force-closes if needed.
 
-To run the server **in the foreground** (no tmux, e.g. for quick testing):
+To run the server **in the foreground** (e.g. for quick testing):
 
 ```bash
 cd bedrock_server && box64 ./bedrock_server
@@ -158,7 +158,7 @@ tar -xzf backups/mc-backup-YYYYMMDD-HHMMSS.tar.gz -C bedrock_server
 ```bash
 ./stop.sh
 ./update.sh                 # uses the pinned version (reads lib/version.sh)
-BDS_BUILD=1.21.130.02 ./update.sh   # or target a specific new build
+BDS_BUILD=1.21.130.3 ./update.sh    # or target a specific new build
 ./start.sh
 ```
 
@@ -276,8 +276,8 @@ unless you:
    `Settings → Apps → Termux → Battery → Unrestricted`.
 2. **Lock Termux in the task switcher** (hold the app card → “Lock”).
 3. Keep the screen on while hosting (`./start.sh` prints a note).
-4. Optionally run the server inside **tmux** (already the default) so toggling
-   windows doesn't kill it.
+4. Keep Termux open. Pressing Home or opening another app can pause Termux;
+   pin/lock it so it keeps running (see above).
 
 To make the server survive reboots you'd add an init/Tasker script that runs
 `proot-distro login debian -- bash -lc 'cd /root/mc-bedrock-server && ./start.sh'`.
@@ -326,7 +326,7 @@ Debian container step after a partial run).**
 - The official CDN (`minecraft.azureedge.net`) is sometimes unreachable on
   phones with strict DNS. The installer tries several official mirrors and the
   current download page. Check with `curl -v https://minecraft.azureedge.net/`.
-- You can manually download `bedrock-server-1.21.130.01.zip` from
+- You can manually download `bedrock-server-1.21.130.4.zip` from
   [Minecraft's official server download page](https://www.minecraft.net/en-us/download/server/bedrock),
   drop it in `data/`, and run `./install.sh --no-download`.
 
@@ -370,7 +370,7 @@ cd /root/mc-bedrock-server
 
 ## How the version check / “fail safely” works
 
-- `lib/version.sh` holds the pinned `BDS_BUILD=1.21.130.01` and
+- `lib/version.sh` holds the pinned `BDS_BUILD=1.21.130.4` and
   `BDS_GAME_VERSION=1.21.130`.
 - `install.sh` only downloads that exact filename from official sources.
 - After download it checks the archive contains `bedrock_server` and

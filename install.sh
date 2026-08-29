@@ -140,8 +140,8 @@ if should_use_distro && [ "${SKIP_PROOT}" -eq 0 ]; then
   if ! command -v proot-distro >/dev/null 2>&1; then
     info "Installing proot-distro and download tools inside Termux..."
     pkg update -y >/dev/null 2>&1 || true
-    pkg install -y proot-distro curl unzip jq tmux || \
-      die "Could not install proot-distro. Run: pkg install proot-distro curl unzip jq tmux"
+    pkg install -y proot-distro curl unzip jq || \
+      die "Could not install proot-distro. Run: pkg install proot-distro curl unzip jq"
   fi
   if ! distro_exists; then
     info "Installing the Debian container (downloads ~1GB of packages; please wait)..."
@@ -186,13 +186,13 @@ fi
 # Install system packages (container / Linux host)
 # ---------------------------------------------------------------------------
 if command -v apt-get >/dev/null 2>&1 && ! is_termux; then
-  info "Installing system packages (curl, unzip, jq, tmux, ca-certificates)..."
+  info "Installing system packages (curl, unzip, jq, ca-certificates)..."
   apt-get update -y >/dev/null 2>&1 || warn "apt update failed; continuing"
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl unzip jq tmux -S "${TMUX_SOCKET}" ca-certificates wget libcurl4 libssl3 libstdc++6 \
+    curl unzip jq ca-certificates wget libcurl4 libssl3 libstdc++6 \
     >/dev/null 2>&1 || \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl unzip jq tmux -S "${TMUX_SOCKET}" ca-certificates wget libcurl4 libstdc++6 \
+    curl unzip jq ca-certificates wget libstdc++6 \
     >/dev/null 2>&1 || warn "Some packages could not be installed; the server may need them."
 fi
 
