@@ -2,8 +2,10 @@
 # start.sh -- start the Bedrock server, keep it alive across crashes, and log
 # everything. Safe to run from any directory or from proot/termux.
 #
-# The server runs in a tmux session named "bds". Detach with Ctrl+B then D,
-# re-attach with ./tmux-console.sh, and stop with ./stop.sh.
+# The server reads console commands from a named pipe (logs/control.fifo):
+#   ./stop.sh          graceful stop ("stop" command, then SIGTERM fallback)
+#   ./console.sh       interactive console (type commands, Ctrl+D to leave)
+#   ./status.sh        running? + health
 
 set -u
 
@@ -14,66 +16,49 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # On Termux/ARM64, run inside the Debian container.
 if should_use_distro; then bounce_into_distro "$@"; fi
 
-if [ "$(id -u)" -ne 0 ] && ! is_termux; then
-  warn "Not running as root; the server may not bind privileged ports (not needed for 19132)."
+[ -x "${BDS_BIN}" ] || die "Server binary not found (${BDS_BIN}). Run ./install.sh first."
+
+server_pid() { cat "${PIDFILE}" 2>/dev/null || true; }
+
+if is_running; then
+  ok "Server is already running (pid $(server_pid))."
+  echo "Console: ./console.sh   Stop: ./stop.sh"
+  exit 0
 fi
 
-# ---------------- guards -----------------------------------------------------
-[ -x "${BDS_BIN}" ] || die "Server binary not found (${BDS_BIN}).
-Run ./install.sh first."
+# ---------------- control FIFO ----------------------------------------------
+# Commands typed into ./console.sh and ./stop.sh are written here; the server
+# reads them from stdin. FIFOs survive proot session isolation (tmux sockets
+# do not), so this works from any later Termux/proot login.
+CTRL_FIFO="${LOGS_DIR}/control.fifo"
+rm -f "${CTRL_FIFO}"
+mkfifo -m 600 "${CTRL_FIFO}" 2>/dev/null || die "Could not create ${CTRL_FIFO}"
+# Keep the read end open in this process so writers never block, even across
+# server restarts.
+exec 9<>"${CTRL_FIFO}"
 
-if command -v tmux >/dev/null 2>&1; then
-  if tmux -S "${TMUX_SOCKET}" has-session -t bds 2>/dev/null; then
-    if is_running; then
-      ok "Server is already running (pid $(cat "${PIDFILE}"))."
-      echo "Attach:  ./tmux-console.sh   Stop:  ./stop.sh"
-      exit 0
-    fi
-    warn "Found stale tmux session; killing it."
-    tmux -S "${TMUX_SOCKET}" kill-session -t bds 2>/dev/null || true
-  fi
-else
-  warn "tmux is not installed. Starting in the foreground instead; Ctrl+C to stop."
-  run_foreground
-  exit $?
-fi
-
-# ---------------- memory / CPU tuning ----------------------------------------
-# These are harmless no-ops on most systems but help constrained Android phones.
-export USE_XDG=1
-# Ask the kernel to reclaim clean pages under memory pressure earlier.
-if [ -w /proc/sys/vm/swappiness ]; then
-  echo 10 > /proc/sys/vm/swappiness 2>/dev/null || true
-fi
-
-# Compute a bounded thread count for phones (32-bit or 64-bit).
+# ---------------- memory / CPU tuning ---------------------------------------
 cpus="$(nproc 2>/dev/null || echo 4)"
 [ "${cpus}" -gt 8 ] && cpus=8
 [ "${cpus}" -lt 1 ] && cpus=1
 info "Detected ${cpus} CPU core(s)."
 
-# ---------------- ensure dirs & config ----------------------------------------
 ensure_runtime_dirs
-
 rm -f "${STOP_REQUESTED}"
 
-# ---------------- supervisord-like restart loop -------------------------------
-SESSION="bds"
-RESTART_COUNT=0
-MAX_RESTART_BACKOFF=60
-BACKOFF=2
-
-start_instance() {
+# ---------------- launch + supervise ----------------------------------------
+launch_server() {
   local launch
   launch="$(server_launch_cmd)"
-  rm -f "${TMUX_SOCKET}"  # stale socket from a previous, dead session
-  info "Launching: cd ${SERVER_DIR} && ${launch} (in tmux session '${SESSION}')"
-  tmux -S "${TMUX_SOCKET}" new-session -d -s "${SESSION}" "cd '${SERVER_DIR}' && exec ${launch} 2>&1 | tee -a '${SERVER_LOGFILE}'"
-  # Record a pidfile for stop.sh. The tmux pane PID is a stable proxy for
-  # "something is running"; stop.sh uses it to wait for a clean exit.
-  local pid
-  pid="$(tmux -S "${TMUX_SOCKET}" list-panes -t "${SESSION}" -F '#{pane_pid}' 2>/dev/null | head -1)"
-  [ -n "${pid}" ] && printf '%s\n' "${pid}" > "${PIDFILE}" || rm -f "${PIDFILE}"
+  info "Launching: cd ${SERVER_DIR} && ${launch} (stdin <- control.fifo)"
+  (
+    cd "${SERVER_DIR}" || exit 1
+    # Feed the FIFO (fd 9) to stdin, tee output to the rotating log.
+    exec 0<&9
+    exec ${launch} 2>&1 | tee -a "${SERVER_LOGFILE}"
+  ) &
+  SERVER_PID=$!
+  printf '%s\n' "${SERVER_PID}" > "${PIDFILE}"
 }
 
 log_cycle() {
@@ -84,14 +69,18 @@ log_cycle() {
     fi ) 9>"${LOGS_DIR}/.loglock"
 }
 
-while :; do
-  start_instance
+RESTART_COUNT=0
+BACKOFF=2
+MAX_RESTART_BACKOFF=60
 
-  # Inner supervision: wait while the tmux session (and thus the server) is
-  # alive. If the BDS process dies, tmux ends the session and we restart.
-  while tmux -S "${TMUX_SOCKET}" has-session -t "${SESSION}" 2>/dev/null; do
+launch_server
+
+while :; do
+  # Supervise: wait while the server process is alive.
+  while kill -0 "${SERVER_PID}" 2>/dev/null; do
     sleep 5
   done
+  wait "${SERVER_PID}" 2>/dev/null
   rm -f "${PIDFILE}"
   RESTART_COUNT=$((RESTART_COUNT + 1))
   log_cycle
@@ -113,4 +102,6 @@ while :; do
     sleep "${BACKOFF}"
     [ "${BACKOFF}" -lt "${MAX_RESTART_BACKOFF}" ] && BACKOFF=$((BACKOFF * 2))
   fi
+
+  launch_server
 done

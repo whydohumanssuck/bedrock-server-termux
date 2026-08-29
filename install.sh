@@ -110,7 +110,7 @@ ${C_GRN}Next steps:${C_RST}
   1. Edit ${SERVER_DIR}/server.properties if you want to change the
      server name, gamemode, whitelist or port.
   2. Start the server:   ./start.sh
-  3. Attach to console:  ./tmux-console.sh   (detach with Ctrl+B then D)
+  3. Attach to console:  ./console.sh   (detach with Ctrl+B then D)
   4. Stop the server:    ./stop.sh
   5. Back up worlds:     ./backup.sh
 EOF
@@ -160,7 +160,7 @@ installed, run: proot-distro reset debian, then ./install.sh again."
   cp -r "${PROJECT_ROOT}/lib" "${PROJECT_ROOT}/config" "${STAGE}/" 2>/dev/null || true
   cp -r "${PROJECT_ROOT}/worlds" "${PROJECT_ROOT}/behavior_packs" "${PROJECT_ROOT}/resource_packs" "${STAGE}/" 2>/dev/null || true
   cp -r "${PROJECT_ROOT}/LICENSE" "${PROJECT_ROOT}/README.md" "${STAGE}/" 2>/dev/null || true
-  for f in install.sh start.sh stop.sh backup.sh update.sh tmux-console.sh status.sh; do
+  for f in install.sh start.sh stop.sh backup.sh update.sh console.sh status.sh; do
     [ -f "${PROJECT_ROOT}/${f}" ] && cp "${PROJECT_ROOT}/${f}" "${STAGE}/" 2>/dev/null || true
   done
   proot-distro login "${DISTRO}" --bind "${STAGE}:/project" -- bash -lc \

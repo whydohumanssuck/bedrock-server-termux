@@ -11,6 +11,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if should_use_distro; then bounce_into_distro "$@"; fi
 
+CTRL_FIFO="${LOGS_DIR}/control.fifo"
+
 KEEP=${KEEP:-7}
 
 if [ ! -d "${SERVER_DIR}/worlds" ]; then
@@ -22,9 +24,9 @@ out="${BACKUP_DIR}/mc-backup-${stamp}.tar.gz"
 
 # Ask a running server to hold world saves so the backup is consistent.
 HOLD=""
-if is_running && command -v tmux >/dev/null 2>&1 && tmux -S "${TMUX_SOCKET}" has-session -t bds 2>/dev/null; then
+if is_running && [ -p "${CTRL_FIFO}" ]; then
   info "Server is running; holding world saves while backing up."
-  tmux -S "${TMUX_SOCKET}" send-keys -t bds "save hold" Enter
+  printf 'save hold\n' > "${CTRL_FIFO}" 2>/dev/null || true
   sleep 2
   HOLD=1
 fi
@@ -41,7 +43,7 @@ tar -czf "${out}" \
   }
 
 if [ -n "${HOLD}" ]; then
-  tmux -S "${TMUX_SOCKET}" send-keys -t bds "save resume" Enter 2>/dev/null || true
+  printf 'save resume\n' > "${CTRL_FIFO}" 2>/dev/null || true
 fi
 
 size="$(du -h "${out}" 2>/dev/null | cut -f1)"

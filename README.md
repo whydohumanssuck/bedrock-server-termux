@@ -23,7 +23,7 @@ at install time — no proprietary binaries are bundled in this repository.
 - One-command installer that also creates the whole BDS directory structure.
 - Phone-friendly `server.properties` defaults tuned for 3–5 players.
 - `start.sh` with **automatic crash/restart** handling and log rotation.
-- `stop.sh` (graceful), `backup.sh` (with world-save hold), `update.sh`, `status.sh`.
+- `stop.sh` (graceful), `console.sh`, `backup.sh` (with world-save hold), `update.sh`, `status.sh`.
 - Import/creation of worlds, plus support for **behavior packs** and **resource packs**.
 - Instructions for **LAN** and **internet** multiplayer, and background-processing tips.
 
@@ -108,7 +108,7 @@ When it finishes you'll see the “Next steps” summary.
 ./start.sh
 
 # open the live console (detach with Ctrl+B then D)
-./tmux-console.sh
+./console.sh
 
 # check if it's running
 ./status.sh
@@ -117,10 +117,11 @@ When it finishes you'll see the “Next steps” summary.
 ./stop.sh
 ```
 
-`start.sh` runs the server inside a **tmux session named `bds`**, writes logs to
-`logs/server.log`, rotates logs to keep them small, and **automatically restarts
-the server on crashes** with exponential backoff. `./stop.sh` sends the server's
-`stop` command, waits up to 45s for a clean shutdown, then force-closes if needed.
+`start.sh` runs the server with its console wired to a named pipe
+(`logs/control.fifo`), writes logs to `logs/server.log`, rotates logs to keep
+them small, and **automatically restarts the server on crashes** with
+exponential backoff. `./stop.sh` sends the server's `stop` command through the
+pipe, waits up to 45s for a clean shutdown, then force-closes if needed.
 
 To run the server **in the foreground** (no tmux, e.g. for quick testing):
 
@@ -293,7 +294,7 @@ project/
 ├── backup.sh             # world backups
 ├── update.sh             # update the server, preserve data
 ├── status.sh             # running? + health
-├── tmux-console.sh       # attach to the server console
+├── console.sh       # attach to the server console
 ├── lib/
 │   ├── common.sh         # shared helpers
 │   └── version.sh        # ✏️ the version pin lives here
