@@ -241,6 +241,11 @@ if [ "${FORCE}" -eq 0 ] && [ -f "${INSTALLED_MARKER}" ] && [ -x "${BDS_BIN}" ]; 
   print_next_steps
   exit 0
 fi
+# --force implies a full fresh install (fresh template too).
+[ "${FORCE}" -eq 1 ] && [ -f "${CONFIG_DIR}/server.properties.template" ] && {
+  cp "${CONFIG_DIR}/server.properties.template" "${SERVER_DIR}/server.properties"
+  info "Applied phone-tuned server.properties (--force)."
+}
 
 if [ ! -f "${ZIP_PATH}" ]; then
   if [ "${NO_DOWNLOAD}" -eq 0 ]; then
