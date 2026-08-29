@@ -2,6 +2,8 @@
 
 <img src="assets/server-icon.jpg" width="120" alt="Server logo"/>
 
+<img src="docs/server-settings-screenshot.jpg" width="700" alt="Server configuration screenshot on Android"/>
+
 # ⛏️ Termux Bedrock Server
 
 **Run a Minecraft Bedrock Dedicated Server on your Android phone — 1.21.130**
@@ -303,11 +305,7 @@ To make the server survive reboots you'd add an init/Tasker script that runs
 
 ## Screenshots
 
-A screenshot of the server configuration screen on an Android phone:
-
-<p align="center">
-  <img src="docs/server-settings-screenshot.jpg" width="700" alt="Server configuration screenshot on Android"/>
-</p>
+The configuration screenshot is shown at the top of this page.
 
 The server icon shown in Minecraft's multiplayer menu is
 [`assets/world_icon.jpeg`](assets/world_icon.jpeg) (256×256 JPEG). To use your
