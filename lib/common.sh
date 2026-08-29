@@ -51,6 +51,9 @@ die()   { printf '%s[FAIL]%s %s\n' "$C_RED" "$C_RST" "$*" >&2; exit 1; }
 
 # is_termux: 0 = running inside Termux, 1 = not.
 is_termux() {
+  # Inside the Debian container the host Termux paths are still visible, but
+  # that environment must be treated as plain GNU/Linux.
+  in_distro && return 1
   [ -n "${TERMUX_VERSION:-}" ] && return 0
   [ -d /data/data/com.termux/files/usr ] && return 0
   return 1
