@@ -152,7 +152,7 @@ installed, run: proot-distro reset debian, then ./install.sh again."
 
   # Stage the whole project so the container gets every script, config,
   # worlds/ and packs/ folder.
-  STAGE="$(mktemp -d)"
+  STAGE="$(mktemp -d "${TMPDIR:-${HOME}}/mc-stage.XXXXXX" 2>/dev/null || mktemp -d)"
   cp -r "${PROJECT_ROOT}/lib" "${PROJECT_ROOT}/config" "${STAGE}/" 2>/dev/null || true
   cp -r "${PROJECT_ROOT}/worlds" "${PROJECT_ROOT}/behavior_packs" "${PROJECT_ROOT}/resource_packs" "${STAGE}/" 2>/dev/null || true
   cp -r "${PROJECT_ROOT}/LICENSE" "${PROJECT_ROOT}/README.md" "${STAGE}/" 2>/dev/null || true

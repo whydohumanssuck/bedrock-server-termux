@@ -95,9 +95,22 @@ bds_can_run() {
 # Checks both proot-distro's status list AND the rootfs directory, because
 # the list query can be stale after an interrupted install.
 distro_exists() {
-  if proot-distro list --installed 2>/dev/null | grep -q "^${DISTRO}$"; then return 0; fi
-  local roots="${PREFIX:-/data/data/com.termux/files/usr}/var/lib/proot-distro/installed-rootfs"
-  [ -d "${roots}/${DISTRO}" ] && return 0
+  # 1) Ask proot-distro itself. Recent versions dropped '--installed' and
+  #    print bare names with '-q'; older versions accept '--installed' (and
+  #    may ignore '-q', printing a bullet list -- the regex tolerates that).
+  local names
+  names="$(proot-distro list -q 2>/dev/null \
+           || proot-distro list --installed 2>/dev/null)"
+  if printf '%s\n' "${names}" | grep -qE "(^|[^[:alnum:]_-])${DISTRO}([^[:alnum:]_-]|$)"; then
+    return 0
+  fi
+
+  # 2) Fall back to the on-disk layouts proot-distro uses:
+  #    new -> $PREFIX/var/lib/proot-distro/containers/<name>/rootfs
+  #    old -> $PREFIX/var/lib/proot-distro/installed-rootfs/<name>
+  local prefix="${PREFIX:-/data/data/com.termux/files/usr}"
+  [ -d "${prefix}/var/lib/proot-distro/containers/${DISTRO}/rootfs" ] && return 0
+  [ -d "${prefix}/var/lib/proot-distro/installed-rootfs/${DISTRO}" ] && return 0
   return 1
 }
 
