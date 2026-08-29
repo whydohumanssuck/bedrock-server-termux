@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if should_use_distro; then bounce_into_distro "$@"; fi
 
-if ! is_running && ! { command -v tmux >/dev/null 2>&1 && tmux has-session -t bds 2>/dev/null; }; then
+if ! is_running && ! { command -v tmux >/dev/null 2>&1 && tmux -S "${TMUX_SOCKET}" has-session -t bds 2>/dev/null; }; then
   info "Server is not running."
   exit 0
 fi
@@ -19,12 +19,12 @@ fi
 touch "${STOP_REQUESTED}"
 
 stopped=0
-if command -v tmux >/dev/null 2>&1 && tmux has-session -t bds 2>/dev/null; then
+if command -v tmux >/dev/null 2>&1 && tmux -S "${TMUX_SOCKET}" has-session -t bds 2>/dev/null; then
   info "Sending the 'stop' command to the server console..."
-  tmux send-keys -t bds "stop" Enter
+  tmux -S "${TMUX_SOCKET}" send-keys -t bds "stop" Enter
   # Wait up to 45 seconds for a clean shutdown.
   for _ in $(seq 1 45); do
-    tmux has-session -t bds 2>/dev/null || { stopped=1; break; }
+    tmux -S "${TMUX_SOCKET}" has-session -t bds 2>/dev/null || { stopped=1; break; }
     sleep 1
   done
 fi
@@ -39,7 +39,7 @@ if [ "${stopped}" -eq 0 ]; then
   # Last resort: kill any remaining BDS processes.
   pkill -f 'bedrock_server' 2>/dev/null && sleep 2 || true
   if command -v tmux >/dev/null 2>&1; then
-    tmux kill-session -t bds 2>/dev/null || true
+    tmux -S "${TMUX_SOCKET}" kill-session -t bds 2>/dev/null || true
   fi
 fi
 

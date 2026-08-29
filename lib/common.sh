@@ -28,6 +28,11 @@ RESOURCE_PACK_BASE="${PROJECT_ROOT}/resource_packs"
 
 SERVER_LOGFILE="${LOGS_DIR}/server.log"
 PIDFILE="${LOGS_DIR}/server.pid"
+
+# proot-distro v5 gives each login its own /tmp, so tmux' default socket is
+# invisible across sessions. Use an explicit socket inside the project dir
+# (persistent and shared by every login).
+TMUX_SOCKET="${LOGS_DIR}/tmux-bds.sock"
 STOP_REQUESTED="${LOGS_DIR}/.stop-requested"
 
 # proot container name (Termux/ARM64 compatibility layer)

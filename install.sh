@@ -184,10 +184,10 @@ if command -v apt-get >/dev/null 2>&1 && ! is_termux; then
   info "Installing system packages (curl, unzip, jq, tmux, ca-certificates)..."
   apt-get update -y >/dev/null 2>&1 || warn "apt update failed; continuing"
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl unzip jq tmux ca-certificates wget libcurl4 libssl3 libstdc++6 \
+    curl unzip jq tmux -S "${TMUX_SOCKET}" ca-certificates wget libcurl4 libssl3 libstdc++6 \
     >/dev/null 2>&1 || \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    curl unzip jq tmux ca-certificates wget libcurl4 libstdc++6 \
+    curl unzip jq tmux -S "${TMUX_SOCKET}" ca-certificates wget libcurl4 libstdc++6 \
     >/dev/null 2>&1 || warn "Some packages could not be installed; the server may need them."
 fi
 
@@ -279,6 +279,13 @@ fi
 
 touch "${INSTALLED_MARKER}"
 ok "Installed ${BDS_BUILD} (game ${BDS_GAME})."
+
+# The official zip ships stock server.properties; on a fresh install the
+# project's phone-tuned template wins (existing config survives later runs).
+if [ -f "${CONFIG_DIR}/server.properties.template" ]; then
+  cp "${CONFIG_DIR}/server.properties.template" "${SERVER_DIR}/server.properties"
+  ok "Applied phone-tuned ${SERVER_DIR}/server.properties"
+fi
 
 # ---------------------------------------------------------------------------
 # Config / imports

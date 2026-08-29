@@ -23,14 +23,14 @@ fi
 Run ./install.sh first."
 
 if command -v tmux >/dev/null 2>&1; then
-  if tmux has-session -t bds 2>/dev/null; then
+  if tmux -S "${TMUX_SOCKET}" has-session -t bds 2>/dev/null; then
     if is_running; then
       ok "Server is already running (pid $(cat "${PIDFILE}"))."
       echo "Attach:  ./tmux-console.sh   Stop:  ./stop.sh"
       exit 0
     fi
     warn "Found stale tmux session; killing it."
-    tmux kill-session -t bds 2>/dev/null || true
+    tmux -S "${TMUX_SOCKET}" kill-session -t bds 2>/dev/null || true
   fi
 else
   warn "tmux is not installed. Starting in the foreground instead; Ctrl+C to stop."
@@ -66,12 +66,13 @@ BACKOFF=2
 start_instance() {
   local launch
   launch="$(server_launch_cmd)"
+  rm -f "${TMUX_SOCKET}"  # stale socket from a previous, dead session
   info "Launching: cd ${SERVER_DIR} && ${launch} (in tmux session '${SESSION}')"
-  tmux new-session -d -s "${SESSION}" "cd '${SERVER_DIR}' && exec ${launch} 2>&1 | tee -a '${SERVER_LOGFILE}'"
+  tmux -S "${TMUX_SOCKET}" new-session -d -s "${SESSION}" "cd '${SERVER_DIR}' && exec ${launch} 2>&1 | tee -a '${SERVER_LOGFILE}'"
   # Record a pidfile for stop.sh. The tmux pane PID is a stable proxy for
   # "something is running"; stop.sh uses it to wait for a clean exit.
   local pid
-  pid="$(tmux list-panes -t "${SESSION}" -F '#{pane_pid}' 2>/dev/null | head -1)"
+  pid="$(tmux -S "${TMUX_SOCKET}" list-panes -t "${SESSION}" -F '#{pane_pid}' 2>/dev/null | head -1)"
   [ -n "${pid}" ] && printf '%s\n' "${pid}" > "${PIDFILE}" || rm -f "${PIDFILE}"
 }
 
@@ -88,7 +89,7 @@ while :; do
 
   # Inner supervision: wait while the tmux session (and thus the server) is
   # alive. If the BDS process dies, tmux ends the session and we restart.
-  while tmux has-session -t "${SESSION}" 2>/dev/null; do
+  while tmux -S "${TMUX_SOCKET}" has-session -t "${SESSION}" 2>/dev/null; do
     sleep 5
   done
   rm -f "${PIDFILE}"

@@ -22,9 +22,9 @@ out="${BACKUP_DIR}/mc-backup-${stamp}.tar.gz"
 
 # Ask a running server to hold world saves so the backup is consistent.
 HOLD=""
-if is_running && command -v tmux >/dev/null 2>&1 && tmux has-session -t bds 2>/dev/null; then
+if is_running && command -v tmux >/dev/null 2>&1 && tmux -S "${TMUX_SOCKET}" has-session -t bds 2>/dev/null; then
   info "Server is running; holding world saves while backing up."
-  tmux send-keys -t bds "save hold" Enter
+  tmux -S "${TMUX_SOCKET}" send-keys -t bds "save hold" Enter
   sleep 2
   HOLD=1
 fi
@@ -41,7 +41,7 @@ tar -czf "${out}" \
   }
 
 if [ -n "${HOLD}" ]; then
-  tmux send-keys -t bds "save resume" Enter 2>/dev/null || true
+  tmux -S "${TMUX_SOCKET}" send-keys -t bds "save resume" Enter 2>/dev/null || true
 fi
 
 size="$(du -h "${out}" 2>/dev/null | cut -f1)"
