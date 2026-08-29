@@ -17,8 +17,12 @@
 /resource_packs/*
 !/resource_packs/.README.txt
 /config/server.properties
+/config/worldsync.conf
 
 # ---- Editor / OS cruft ----------------------------------------------------
 .DS_Store
 *.swp
 *~
+/sync/*
+!/sync/.gitkeep
+*.mcworld

@@ -1,0 +1,21 @@
+# ---------------------------------------------------------------------------
+# worldsync.sh configuration
+# ---------------------------------------------------------------------------
+# Copy this file to config/worldsync.conf and edit the values below.
+
+# The OTHER phone's Termux user, IP and SSH port. Both phones must be on the
+# SAME Wi-Fi network, and the other phone must be running sshd.
+# Find the other phone's IP:  (on that phone)  ifconfig | grep inet
+PEER_USER=""
+PEER_HOST=""
+PEER_PORT="8022"
+
+# Minecraft Pocket Edition worlds live under this folder (usually as-is):
+MOJANG_ROOT="/storage/emulated/0/Android/data/com.mojang.minecraftpe/files/games/com.mojang"
+
+# Optional: lock a single world (folder name). If blank, worldsync.sh asks
+# which world to use each time.
+WORLD_FOLDER=""
+
+# How many timestamped local backups to keep on  pull
+KEEP_BACKUPS=7

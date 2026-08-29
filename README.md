@@ -217,6 +217,80 @@ pin from that one file.
 
 ---
 
+## 🎮 Shared world on two phones (no big server)
+
+This is the "poor man's server": you host the world in Minecraft normally
+(your friend taps **Join** on the same Wi-Fi), and when you're done playing
+you **sync the world** to your friend's phone. Later she plays it solo, syncs
+it back, and both phones stay up to date.
+
+### How it works
+
+- Minecraft Bedrock stores each world in a folder under
+  `Android/data/com.mojang.minecraftpe/files/games/com.mojang/minecraftWorlds/`.
+- [`worldsync.sh`](worldsync.sh) syncs that folder between the two phones
+  over **your own Wi-Fi** (rsync over SSH — no internet, router, or port
+  forwarding involved).
+- It can also **export/import `.mcworld`** files for when the phones are
+  apart (send the file over WhatsApp or a cloud share).
+
+### One-time setup (on BOTH phones)
+
+```bash
+pkg install -y openssh rsync python  # in Termux
+termux-setup-storage                 # grant storage; on Android 11+ also allow
+                                     # "All files access" to Termux under
+                                     # Settings > Apps > Termux > Permissions
+ssh-keygen -t ed25519                # (optional) so syncing is passwordless
+sshd                                 # start SSH so the other phone can reach you
+```
+
+Then copy the example config and fill in the OTHER phone's details:
+
+```bash
+cp config/worldsync.conf.example config/worldsync.conf
+nano config/worldsync.conf   # set PEER_USER, PEER_HOST (their phone IP),
+                             # PEER_PORT (8022), and the world folder name
+```
+
+> To find the other phone's IP, run `ifconfig | grep inet` on that phone
+> (both must be on the same Wi-Fi network).
+
+### Play + sync cycle
+
+1. **Play:** one person hosts the world in Minecraft; the other joins (both on
+   the same Wi-Fi).
+2. **Sync after each session:** close Minecraft on both phones, then from the
+   phone that just played run:
+   ```bash
+   ./worldsync.sh push
+   ```
+   (On the machine that wants the latest version run `./worldsync.sh pull`.)
+3. Open Minecraft on the other phone — the world is there, including all
+   changes. Next session, sync back the other way.
+
+> ⚠️ **Rules to avoid losing progress:** close Minecraft on both phones before
+> syncing, and only play one session at a time. `worldsync.sh` compares file
+> times and warns you if one side is newer, but it never tries to merge two
+> different play sessions automatically.
+
+### Other commands
+
+```bash
+./worldsync.sh check     # is this phone ready? what's missing?
+./worldsync.sh list      # which worlds are on this phone
+./worldsync.sh export    # package the newest world as a .mcworld file
+./worldsync.sh import    # import a .mcworld file (opens Minecraft picker)
+./worldsync.sh pull      # grab the world from the other phone
+./worldsync.sh help      # all commands
+```
+
+> **Note:** on Android 11+ the `Android/data` folder is hidden from apps by
+> default. Grant Termux **All files access** (Settings > Apps > Termux >
+> Permissions > Files and media) or the script cannot read your worlds.
+
+---
+
 ## Behavior & Resource Packs
 
 Put each pack (a folder containing a `manifest.json`) into:
