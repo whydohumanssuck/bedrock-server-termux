@@ -284,6 +284,13 @@ To make the server survive reboots you'd add an init/Tasker script that runs
 
 ---
 
+## Screenshots
+
+A screenshot of the server configuration screen is included for reference:
+[`docs/server-settings-screenshot.jpg`](docs/server-settings-screenshot.jpg).
+
+---
+
 ## Directory layout
 
 ```
