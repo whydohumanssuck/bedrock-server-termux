@@ -168,6 +168,13 @@ ensure_runtime_dirs() {
       warn "Could not import resource_packs/ (permissions?)"
   fi
 
+  # Deploy the server list icon (world_icon.jpeg) if we have one. Bedrock
+  # reads the icon from the server root and shows it in the multiplayer menu.
+  if [ -f "${PROJECT_ROOT}/assets/world_icon.jpeg" ]; then
+    cp -f "${PROJECT_ROOT}/assets/world_icon.jpeg" "${SERVER_DIR}/world_icon.jpeg" 2>/dev/null || \
+      warn "Could not deploy world_icon.jpeg (permissions?)"
+  fi
+
   # Auto-create level config when a single world was imported.
   imported="$(find "${SERVER_DIR}/worlds" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)"
   if [ -f "${SERVER_DIR}/server.properties" ] && [ "${imported}" -eq 1 ]; then
@@ -319,7 +326,7 @@ sync_into_distro() {
   local stage
   stage="$(mktemp -d "${TMPDIR:-${HOME}}/mc-sync.XXXXXX" 2>/dev/null || mktemp -d)" || return 1
   # Only copy sources, never generated/user data.
-  cp -r "${PROJECT_ROOT}/lib" "${PROJECT_ROOT}/config" "${stage}/" 2>/dev/null || true
+  cp -r "${PROJECT_ROOT}/lib" "${PROJECT_ROOT}/config" "${PROJECT_ROOT}/assets" "${stage}/" 2>/dev/null || true
   for f in install.sh start.sh stop.sh backup.sh update.sh console.sh status.sh; do
     [ -f "${PROJECT_ROOT}/${f}" ] && cp "${PROJECT_ROOT}/${f}" "${stage}/" 2>/dev/null || true
   done
@@ -327,6 +334,7 @@ sync_into_distro() {
     dst="/root/mc-bedrock-server"
     cp -r /sync/lib/.  "$dst/lib/"        2>/dev/null || true
     cp -r /sync/config/. "$dst/config/"   2>/dev/null || true
+    cp -r /sync/assets/. "$dst/assets/"   2>/dev/null || true
     for f in /sync/*.sh; do
       [ -f "$f" ] && cp "$f" "$dst/" 2>/dev/null || true
     done

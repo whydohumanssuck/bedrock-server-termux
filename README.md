@@ -18,6 +18,8 @@ at install time — no proprietary binaries are bundled in this repository.
 ## Features
 
 - Pinned to Bedrock **1.21.130** and fails safely if the downloaded file isn't the right version.
+- A server **logo/icon** is bundled and shown in the Minecraft multiplayer menu
+  (customize it by replacing `assets/world_icon.jpeg`).
 - Automatic detection of Termux / Android / Linux and `aarch64` vs `x86_64`.
 - Automatic `box64` + `proot-distro` compatibility layer on ARM64.
 - One-command installer that also creates the whole BDS directory structure.
@@ -288,6 +290,12 @@ To make the server survive reboots you'd add an init/Tasker script that runs
 
 A screenshot of the server configuration screen is included for reference:
 [`docs/server-settings-screenshot.jpg`](docs/server-settings-screenshot.jpg).
+
+The server icon shown in Minecraft's multiplayer menu is
+[`assets/world_icon.jpeg`](assets/world_icon.jpeg) (256×256 JPEG). To use your
+own logo, replace that file (keep the exact name and JPEG format), then restart
+the server with `./stop.sh` + `./start.sh` — it is deployed to the server root
+automatically.
 
 ---
 
